@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; }
+        h1 { color: #333; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-container { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #007bff; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; }
+        tr:hover { background: #f9f9f9; }
+        .actions { display: flex; gap: 10px; }
+        .alert { padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function UserManagement() {
+            const [users, setUsers] = useState([
+                { id: 1, name: 'John Doe', email: 'john@example.com', phone: '123-456-7890' }
+            ]);
+            const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
+            const [editId, setEditId] = useState(null);
+            const [message, setMessage] = useState('');
+
+            const handleInput = (e) => {
+                const { name, value } = e.target;
+                setFormData({ ...formData, [name]: value });
+            };
+
+            const addUser = () => {
+                if (!formData.name || !formData.email || !formData.phone) {
+                    alert('Please fill all fields');
+                    return;
+                }
+                if (editId) {
+                    setUsers(users.map(u => u.id === editId ? { ...formData, id: editId } : u));
+                    setMessage('User updated successfully!');
+                    setEditId(null);
+                } else {
+                    setUsers([...users, { ...formData, id: Date.now() }]);
+                    setMessage('User added successfully!');
+                }
+                setFormData({ name: '', email: '', phone: '' });
+                setTimeout(() => setMessage(''), 3000);
+            };
+
+            const editUser = (user) => {
+                setFormData(user);
+                setEditId(user.id);
+            };
+
+            const deleteUser = (id) => {
+                setUsers(users.filter(u => u.id !== id));
+                setMessage('User deleted successfully!');
+                setTimeout(() => setMessage(''), 3000);
+            };
+
+            return (
+                <div className="container">
+                    <h1>👥 User Management System</h1>
+                    {message && <div className="alert alert-success">{message}</div>}
+                    
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label>Name</label>
+                            <input type="text" name="name" value={formData.name} onChange={handleInput} placeholder="Enter name" />
+                        </div>
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleInput} placeholder="Enter email" />
+                        </div>
+                        <div className="form-group">
+                            <label>Phone</label>
+                            <input type="text" name="phone" value={formData.phone} onChange={handleInput} placeholder="Enter phone" />
+                        </div>
+                    </div>
+
+                    <div className="btn-container">
+                        <button className="btn-primary" onClick={addUser}>
+                            {editId ? '✏️ Update User' : '➕ Add User'}
+                        </button>
+                        {editId && <button className="btn-warning" onClick={() => { setFormData({ name: '', email: '', phone: '' }); setEditId(null); }}>Cancel</button>}
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map(user => (
+                                <tr key={user.id}>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.phone}</td>
+                                    <td className="actions">
+                                        <button className="btn-warning" onClick={() => editUser(user)}>Edit</button>
+                                        <button className="btn-danger" onClick={() => deleteUser(user.id)}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<UserManagement />, document.getElementById('root'));
+    </script>
+</body>
+</html>
